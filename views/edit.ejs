@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Edit Post</title>
+</head>
+<body class="bg-zinc-950 text-white font-sans min-h-screen flex items-center justify-center p-6">
+  <div class="bg-zinc-900 w-full max-w-md p-6 rounded-2xl shadow-xl space-y-6">
+    
+    <!-- Header -->
+    <div class="text-center">
+      <h1 class="text-2xl font-bold text-zinc-300">Edit Your Post</h1>
+      <p class="text-sm text-gray-400 mt-1">Make changes and update below</p>
+    </div>
+
+    <!-- Form -->
+    <form action="/update/<%= post._id %>" method="POST" class="space-y-4">
+      <textarea
+        name="content"
+        rows="4"
+        class="w-full bg-zinc-800 border border-zinc-700 rounded-md p-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+        placeholder="Edit your post..."
+        required
+      ><%= post.content %></textarea>
+
+      <div class="flex gap-3">
+        <button
+          type="submit"
+          class="flex-1 bg-blue-600 hover:bg-blue-700 py-2 rounded-md font-medium transition text-sm"
+        >
+          Update Post
+        </button>
+      </div>
+    </form>
+
+  </div>
+</body>
+</html>

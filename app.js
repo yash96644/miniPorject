@@ -90,9 +90,26 @@ app.get("/logout", (req, res) => {
   res.redirect("/login");
 });
 
+// app.get("/profile", isProtected, async (req, res) => {
+//  let user = await userModel.findOne({email: req.user.email}).populate("posts").lean();
+//  res.render("profile", { user });
+// });
+
 app.get("/profile", isProtected, async (req, res) => {
- let user = await userModel.findOne({email: req.user.email}).populate("posts").lean();
- res.render("profile", { user });
+  let user = await userModel
+    .findOne({ email: req.user.email })
+    .populate({
+      path: "posts",
+      populate: { path: "likes", select: "_id" } // Ensure likes are populated
+    })
+    .lean();
+
+  // Add isLiked flag to each post
+  user.posts.forEach(post => {
+    post.isLiked = post.likes.some(like => like._id.toString() === user._id.toString());
+  });
+
+  res.render("profile", { user });
 });
 
 // app.get("/like/:id", isProtected, async (req, res) => {
@@ -121,6 +138,22 @@ app.get("/like/:id", isProtected, async (req, res) => {
     console.error("Error liking post:", err);
     res.status(500).send("Server error");
   }
+});
+app.get("/edit/:id", isProtected, async (req, res) => {
+  
+    let post = await postModel.findById(req.params.id).lean(); // Using findById directly
+    res.render("edit", { post }); 
+});
+// app.get("/edit/:id", isProtected, async (req, res) => {
+//     const post = await postModel.findById(req.params.id).lean(); // `.lean()` is recommended for EJS
+//     if (!post) return res.status(404).send("Post not found");
+//     res.render("edit", { post });
+// });
+app.post("/update/:id", isProtected, async (req, res) => {
+    await postModel.findByIdAndUpdate(req.params.id, {
+      content: req.body.content,
+    });
+    res.redirect("/profile");
 });
 
 app.post("/post", isProtected, async (req, res) => {

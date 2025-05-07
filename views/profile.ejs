@@ -45,12 +45,12 @@
         <div class="space-y-4">
           <% user.posts.reverse().forEach(function(post) { %>
             <div class="bg-zinc-800 p-4 rounded-lg shadow-sm space-y-2">
-              <h4 class="text-blue-400 text-sm font-medium">@<%= user.username %></h4>
+              <h4 class="text-blue-400 text-sm font-medium"><%= user.username %></h4>
               <p class="text-sm text-gray-300 leading-relaxed"><%= post.content %></p>
 
               <!-- Like Count -->
               <small class="text-xs text-gray-400">
-                <%= post.likes && Array.isArray(post.likes) ? post.likes.length : 0 %> likes
+                <%= post.likes.length%> likes
               </small>
 
               <!-- Buttons -->
@@ -59,10 +59,11 @@
                   href="/like/<%= post._id %>"
                   class="text-xs bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded-md transition inline-block"
                 >
-                  Like
+                  <!-- <%= post.likes.indexOf(user._id) == -1 ? 'Like' : 'Unlike' %> -->
+                  <%= post.isLiked ? 'Unlike' : 'Like' %>
                 </a>
                 <a
-                  href="#"
+                  href="/edit/<%= post._id %>"
                   class="text-xs bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md transition"
                 >
                   Edit
