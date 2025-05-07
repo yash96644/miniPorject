@@ -92,14 +92,40 @@ app.get("/logout", (req, res) => {
 });
 
 app.get("/profile", isProtected, async (req, res) => {
+ let user = await userModel.findOne({email: req.user.email}).populate("posts").lean();
+ res.render("profile", { user });
+});
+
+app.post("/post", isProtected, async (req, res) => {
   try {
-    const user = await userModel.findById(req.user.userid);
-    res.render("profile", { user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error loading profile");
+    let user = await userModel.findOne({ email: req.user.email });
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    const { content } = req.body;
+
+    const post = await postModel.create({
+      user: user._id,
+      content,
+    });
+
+    // Ensure user.posts exists as an array
+    if (!Array.isArray(user.posts)) {
+      user.posts = [];
+    }
+
+    user.posts.push(post._id);
+    await user.save();
+
+    res.redirect("/profile");
+  } catch (err) {
+    console.error("Post Creation Error:", err);
+    res.status(500).send("Server error while creating post");
   }
 });
+
 
 // ✅ Fixed Middleware
 function isProtected(req, res, next) {
