@@ -3,7 +3,6 @@ const app = express();
 const userModel = require("./models/usermodel");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
-const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const postModel = require("./models/post");
 
@@ -94,6 +93,34 @@ app.get("/logout", (req, res) => {
 app.get("/profile", isProtected, async (req, res) => {
  let user = await userModel.findOne({email: req.user.email}).populate("posts").lean();
  res.render("profile", { user });
+});
+
+// app.get("/like/:id", isProtected, async (req, res) => {
+//   let post = await postModel.findById({id : req.params.id});
+//   if(post.likes.indexOf(req.user.userid) === -1){
+//     post.likes.push(req.user.userid);
+//   }else{
+//     post.likes.splice(post.likes.indexOf(req.user.userid), 1);
+//   }
+//   await post.save();
+//   res.redirect("profile");
+//  });
+app.get("/like/:id", isProtected, async (req, res) => {
+  try {
+    let post = await postModel.findById(req.params.id); // Using findById directly
+    if (!post) return res.status(404).send("Post not found");
+
+    const userId = req.user.userid;
+    post.likes = post.likes.includes(userId) 
+      ? post.likes.filter(id => id.toString() !== userId)
+      : [...post.likes, userId];
+
+    await post.save();
+    res.redirect("/profile");
+  } catch (err) {
+    console.error("Error liking post:", err);
+    res.status(500).send("Server error");
+  }
 });
 
 app.post("/post", isProtected, async (req, res) => {
